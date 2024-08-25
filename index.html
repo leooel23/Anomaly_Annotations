@@ -64,6 +64,7 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const csvText = await response.text();
+                console.log('CSV file content:', csvText); // 调试信息
                 images = csvText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
                 console.log('Images loaded:', images); // 调试信息
                 loadImage();
