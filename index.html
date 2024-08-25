@@ -23,15 +23,19 @@
         <button class="category-button" data-category="类别5">类别5</button>
     </div>
     <button id="confirm-button">确认</button>
+    </div>
+    <button id = "prev-button">Previous</button>
+    <button id = "next-button">Next</button>
 
+<!-- javascript -->
     <script>
-        let selectedCategory = null;
-        let currentImageIndex = 0;
-        const images = ['image1.jpg', 'image2.jpg', 'image3.jpg']; // 图片数组
+        // let selectedCategory = null;
+        // let currentImageIndex = 0;
+        // const images = ['10-0.png', '13-0.png', '14-0.png']; // 图片数组
 
-        function loadImage() {
-            document.getElementById('image-display').src = images[currentImageIndex];
-        }
+        // function loadImage() {
+        //     document.getElementById('image-display').src = images[currentImageIndex];
+        // }
 
         // document.querySelectorAll('.category-button').forEach(button => {
         //     button.addEventListener('click', function() {
@@ -46,6 +50,43 @@
         //             image: images[currentImageIndex],
         //             category: selectedCategory
         //         };
+        let selectedCategory = null;
+        let currentImageIndex = 0;
+        const imageFolder = 'UCR'; // 图片文件夹名
+        let images = []; // 图片数组
+
+        // 获取图片列表
+        async function fetchImages() {
+            try {
+                const response = await fetch('/path/to/your/api/that/returns/image/list');
+                images = await response.json();
+                loadImage();
+            } catch (error) {
+                console.error('Error fetching images:', error);
+            }
+        }
+
+        // 加载当前图片
+        function loadImage() {
+            if (images.length > 0) {
+                document.getElementById('image-container').innerHTML = `<img id="image-display" src="${imageFolder}/${images[currentImageIndex]}" alt="Image">`;
+            }
+        }
+        //处理上一张
+        document.getElementById('prev-button').addEventListener('click', function() {
+            if (currentImageIndex > 0) {
+                currentImageIndex--;
+                loadImage();
+            }
+        });
+
+        // 处理下一张图片按钮点击
+        document.getElementById('next-button').addEventListener('click', function() {
+            if (currentImageIndex < images.length - 1) {
+                currentImageIndex++;
+                loadImage();
+            }
+        });
         document.querySelectorAll('.category-button').forEach(button => {
             button.addEventListener('click', function() {
                 // 重置所有按钮的颜色
