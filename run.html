@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>图片标注</title>
+    <style>
+        #image-display {
+            max-width: 500px;
+            max-height: 500px;
+        }
+        .category-button {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <img id="image-display" src="" alt="图片加载中...">
+    <div>
+        <button class="category-button" data-category="类别1">类别1</button>
+        <button class="category-button" data-category="类别2">类别2</button>
+        <button class="category-button" data-category="类别3">类别3</button>
+        <button class="category-button" data-category="类别4">类别4</button>
+        <button class="category-button" data-category="类别5">类别5</button>
+    </div>
+    <button id="confirm-button">确认</button>
+
+    <script>
+        let selectedCategory = null;
+        let currentImageIndex = 0;
+        const images = ['image1.jpg', 'image2.jpg', 'image3.jpg']; // 图片数组
+
+        function loadImage() {
+            document.getElementById('image-display').src = images[currentImageIndex];
+        }
+
+        document.querySelectorAll('.category-button').forEach(button => {
+            button.addEventListener('click', function() {
+                selectedCategory = this.getAttribute('data-category');
+                alert('已选择: ' + selectedCategory);
+            });
+        });
+
+        document.getElementById('confirm-button').addEventListener('click', function() {
+            if (selectedCategory) {
+                const annotation = {
+                    image: images[currentImageIndex],
+                    category: selectedCategory
+                };
+
+                // 使用GitHub API更新annotations.json
+                const token = 'YOUR_GITHUB_TOKEN'; // 替换为你的GitHub Token
+                const repo = 'YOUR_USERNAME/image-annotation'; // 替换为你的GitHub用户名和仓库名
+                const filePath = 'annotations.json';
+
+                fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `token ${token}`
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const sha = data.sha; // 获取文件的SHA值
+                    const currentData = JSON.parse(atob(data.content)); // 解码内容
+
+                    // 更新内容
+                    currentData.push(annotation);
+                    const updatedContent = btoa(JSON.stringify(currentData, null, 2)); // 编码为Base64
+
+                    // 提交更新
+                    return fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: 'Update annotations',
+                            content: updatedContent,
+                            sha: sha
+                        })
+                    });
+                })
+                .then(() => {
+                    alert('标注已保存');
+                    currentImageIndex = (currentImageIndex + 1) % images.length;
+                    loadImage();
+                })
+                .catch(error => console.error('Error:', error));
+            } else {
+                alert('请选择一个类别');
+            }
+        });
+
+        // 初始加载图片
+        loadImage();
+    </script>
+</body>
+</html>
