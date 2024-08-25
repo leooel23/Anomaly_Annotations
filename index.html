@@ -60,18 +60,27 @@
         async function fetchImages() {
             try {
                 const response = await fetch(csvFilePath);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const csvText = await response.text();
                 images = csvText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+                console.log('Images loaded:', images); // 调试信息
                 loadImage();
             } catch (error) {
                 console.error('Error fetching images:', error);
             }
-        }       
+        }
+
 
         // 加载当前图片
         function loadImage() {
             if (images.length > 0) {
-                document.getElementById('image-container').innerHTML = `<img id="image-display" src="${imageFolder}/${images[currentImageIndex]}" alt="Image">`;
+                const imageUrl = `${imageFolder}/${images[currentImageIndex]}`;
+                console.log('Loading image:', imageUrl); // 调试信息
+                document.getElementById('image-container').innerHTML = `<img id="image-display" src="${imageUrl}" alt="Image">`;
+            } else {
+                console.log('No images to display'); // 调试信息
             }
         }
         //处理上一张
