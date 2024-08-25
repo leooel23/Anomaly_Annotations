@@ -2,6 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>图片标注</title>
     <style>
         #image-display {
@@ -15,6 +16,8 @@
 </head>
 <body>
     <img id="image-display" src="" alt="图片加载中...">
+    <h1>Image Display Example</h1>
+    <div id="image-container"></div> <!-- 确保存在这个元素 -->
     <div>
         <button class="category-button" data-category="类别1">类别1</button>
         <button class="category-button" data-category="类别2">类别2</button>
@@ -166,6 +169,7 @@
         //     }
         // });
         // 更新annotations.json
+ // 更新annotations.json
         async function updateAnnotations(annotation) {
             const token = 'YOUR_GITHUB_TOKEN'; // 替换为你的GitHub Token
             const repo = 'YOUR_USERNAME/image-annotation'; // 替换为你的GitHub用户名和仓库名
@@ -224,14 +228,13 @@
                 console.error('Error updating annotations:', error);
             }
         }
+
         // 示例调用
         const annotation = {
             image: images[currentImageIndex],
             category: selectedCategory
         };
         updateAnnotations(annotation);
-        // 初始加载图片
-        loadImage();
     </script>
 </body>
 </html>
