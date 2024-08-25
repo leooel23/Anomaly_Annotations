@@ -104,18 +104,18 @@
         });
         fetchImages();
 
-        // document.querySelectorAll('.category-button').forEach(button => {
-        //     button.addEventListener('click', function() {
-        //         // 重置所有按钮的颜色
-        //         document.querySelectorAll('.category-button').forEach(btn => {
-        //             btn.style.backgroundColor = '';
-        //         });
+        document.querySelectorAll('.category-button').forEach(button => {
+            button.addEventListener('click', function() {
+                // 重置所有按钮的颜色
+                document.querySelectorAll('.category-button').forEach(btn => {
+                    btn.style.backgroundColor = '';
+                });
 
-        //         // 设置选中的类别和按钮颜色
-        //         selectedCategory = this.getAttribute('data-category');
-        //         this.style.backgroundColor = 'yellow'; // 你可以根据需要更改颜色
-        //     });
-        // });
+                // 设置选中的类别和按钮颜色
+                selectedCategory = this.getAttribute('data-category');
+                this.style.backgroundColor = 'yellow'; // 你可以根据需要更改颜色
+            });
+        });
 
         // document.getElementById('confirm-button').addEventListener('click', function() {
         //     if (selectedCategory) {
