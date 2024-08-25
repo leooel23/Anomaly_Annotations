@@ -33,10 +33,29 @@
             document.getElementById('image-display').src = images[currentImageIndex];
         }
 
+        // document.querySelectorAll('.category-button').forEach(button => {
+        //     button.addEventListener('click', function() {
+        //         selectedCategory = this.getAttribute('data-category');
+        //         alert('已选择: ' + selectedCategory);
+        //     });
+        // });
+
+        // document.getElementById('confirm-button').addEventListener('click', function() {
+        //     if (selectedCategory) {
+        //         const annotation = {
+        //             image: images[currentImageIndex],
+        //             category: selectedCategory
+        //         };
         document.querySelectorAll('.category-button').forEach(button => {
             button.addEventListener('click', function() {
+                // 重置所有按钮的颜色
+                document.querySelectorAll('.category-button').forEach(btn => {
+                    btn.style.backgroundColor = '';
+                });
+
+                // 设置选中的类别和按钮颜色
                 selectedCategory = this.getAttribute('data-category');
-                alert('已选择: ' + selectedCategory);
+                this.style.backgroundColor = 'yellow'; // 你可以根据需要更改颜色
             });
         });
 
