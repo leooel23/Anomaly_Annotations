@@ -15,10 +15,21 @@
     </style>
 </head>
 <body>
-    <img id="image-display" src="" alt="图片加载中...">
+    <!-- <img id="image-display" src="" alt="图片加载中..."> -->
     <h1>Image Display Example</h1>
     <div id="image-container"></div> <!-- 确保存在这个元素 -->
-    <div>
+    <button id="prev-button">Previous</button>
+    <button id="next-button">Next</button>
+    <div id="annotation-container">
+        <label for="annotation-select">Select Annotation:</label>
+        <select id="annotation-select">
+            <option value="label1">Label 1</option>
+            <option value="label2">Label 2</option>
+            <option value="label3">Label 3</option>
+        </select>
+        <button id="confirm-button">Confirm</button>
+    </div>
+    <!-- <div>
         <button class="category-button" data-category="类别1">类别1</button>
         <button class="category-button" data-category="类别2">类别2</button>
         <button class="category-button" data-category="类别3">类别3</button>
@@ -28,7 +39,7 @@
     <button id="confirm-button">确认</button>
     </div>
     <button id = "prev-button">Previous</button>
-    <button id = "next-button">Next</button>
+    <button id = "next-button">Next</button> -->
 
 <!-- javascript -->
     <script>
@@ -115,6 +126,18 @@
                 selectedCategory = this.getAttribute('data-category');
                 this.style.backgroundColor = 'yellow'; // 你可以根据需要更改颜色
             });
+        });
+
+        // 处理确认按钮点击
+        document.getElementById('confirm-button').addEventListener('click', function() {
+            const selectedAnnotation = document.getElementById('annotation-select').value;
+            const currentImage = images[currentImageIndex];
+
+            if (selectedAnnotation) {
+                console.log(`${currentImage}: ${selectedAnnotation}`);
+            } else {
+                console.error('No annotation selected');
+            }
         });
 
         // document.getElementById('confirm-button').addEventListener('click', function() {
