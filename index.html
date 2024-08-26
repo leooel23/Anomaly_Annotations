@@ -43,32 +43,95 @@
 
 <!-- javascript -->
     <script>
-        // let selectedCategory = null;
-        // let currentImageIndex = 0;
-        // const images = ['10-0.png', '13-0.png', '14-0.png']; // 图片数组
-
-        // function loadImage() {
-        //     document.getElementById('image-display').src = images[currentImageIndex];
-        // }
-
-        // document.querySelectorAll('.category-button').forEach(button => {
-        //     button.addEventListener('click', function() {
-        //         selectedCategory = this.getAttribute('data-category');
-        //         alert('已选择: ' + selectedCategory);
-        //     });
-        // });
-
-        // document.getElementById('confirm-button').addEventListener('click', function() {
-        //     if (selectedCategory) {
-        //         const annotation = {
-        //             image: images[currentImageIndex],
-        //             category: selectedCategory
-        //         };
         let selectedCategory = null;
         let currentImageIndex = 0;
         const imageFolder = 'UCR'; // 图片文件夹名
         const csvFilePath = 'UCR/img_list.csv'; // 图片列表文件路径
+        const jsonFilePath = 'UCR/labels.json'; // 注释文件路径
         let images = []; // 图片数组
+
+        // 实现对json数据的增删改查
+        // 先引入所需的模块
+        let { join } = require('path')
+        let { readFile, writeFile } = require('fs')
+        const { json } = require('stream/consumers')
+        // 拼接json文件的绝对路径
+        let filePath = join(__dirname, 'books.json')
+
+        // 查询数据 --> 其实就是查询文件的内容
+        function query() {
+            // err为错误 data为查询到的数据
+            // 当没有错误时，err为空对象，有错误时，err内是错误信息
+            readFile(filePath, 'utf-8', (err, data) => {
+                // 如果有错误就抛出错误信息，并不再向下执行
+                if (err) throw err
+                // 将获取到的字符串数据转为对象类型
+                let res = JSON.parse(data)
+                console.log(res) // 查询到的数据
+            })
+        }
+        // query()
+
+        // 增加数据
+        function add(obj) {
+            readFile(filePath, 'utf-8', (err, data) => {
+                if (err) throw err
+                let res = JSON.parse(data)
+                // 需要得到id，id为数组中最后一个图书的id+1
+                let index = res[res.length - 1].id + 1
+                // 向obj对象中添加id属性
+                obj.id = index
+                res.push(obj)
+                // 写入到json文件中 --> 需要把res转为字符串写入到json文件
+                writeFile(filePath, JSON.stringify(res), err => {
+                    if (err) throw err
+                    console.log('添加成功')
+                })
+            })
+        }
+        // add({ bookName: "斗罗大陆", author: "唐家三少", hero: "唐三" })
+
+        // 修改数据   --> 其实就是把原数据删除，把修改的数据放进去
+        // 根据图书id修改
+        function upData(obj) {
+            readFile(filePath, 'utf-8', (err, data) => {
+                if (err) throw err
+                let res = JSON.parse(data)
+                // 使用数组的splice方法
+                // splice(索引,删除的个数,新增的数据)
+                // 可以用数组的findIndex方法获取索引
+                // findIndex(item =>return 条件) 返回符合条件的数据的索引
+                let index = res.findIndex(item => obj.id === res.id)
+                res.splice(index, 1, obj)
+                writeFile(filePath, JSON.stringify(res), err => {
+                    if (err) throw err
+                    console.log('修改成功')
+                })
+            })
+        }
+        // 修改id为3的图书信息为：天官赐福、墨香铜臭、谢怜
+        // upData({ id: 3, bookName: "天官赐福", author: "墨香铜臭", hero: "谢怜" })
+
+        // 删除数据
+        // 根据图书的id删除对应的数据
+        function del(id) {
+            readFile(filePath, 'utf-8', (err, data) => {
+                if (err) throw err
+                let res = JSON.parse(data)
+                // 数组的filter方法可以返回满足筛选条件的结果
+                let r = res.filter(item => {
+                    // 只有当图书的id不为3，才返回结果
+                    return id !== item.id
+                })
+                writeFile(filePath, JSON.stringify(r), err => {
+                    if (err) throw err
+                    console.log('删除成功')
+                })
+            })
+        }
+        // 删除图书id为3的数据
+        del(3)
+
 
         // 获取图片列表
         async function fetchImages() {
@@ -93,10 +156,30 @@
             if (images.length > 0) {
                 const imageUrl = `${imageFolder}/${images[currentImageIndex]}`;
                 console.log('Loading image:', imageUrl); // 调试信息
-                document.getElementById('image-container').innerHTML = `<img id="image-display" src="${imageUrl}" alt="Image">`;
+                const imageContainer = document.getElementById('image-container');
+                if (imageContainer) {
+                    imageContainer.innerHTML = `<img id="image-display" src="${imageUrl}" alt="Image">`;
+                    loadAnnotations(images[currentImageIndex]);
+                } else {
+                    console.error('Image container not found');
+                }
+                // document.getElementById('image-container').innerHTML = `<img id="image-display" src="${imageUrl}" alt="Image">`;
             } else {
                 console.log('No images to display'); // 调试信息
             }
+        }
+        // 加载当前图片的标注
+        function loadAnnotations(imageName) {
+            const filePath = join(__dirname, jsonFilePath);
+            readFile(filePath, 'utf-8', (err, data) => {
+                if (err) {
+                    console.error('Error reading labels file:', err);
+                    return;
+                }
+                const labels = JSON.parse(data);
+                const annotations = labels[imageName] || [];
+                console.log(`Annotations for ${imageName}:`, annotations);
+            });
         }
         //处理上一张
         document.getElementById('prev-button').addEventListener('click', function() {
@@ -139,125 +222,7 @@
                 console.error('No annotation selected');
             }
         });
-
-        // document.getElementById('confirm-button').addEventListener('click', function() {
-        //     if (selectedCategory) {
-        //         const annotation = {
-        //             image: images[currentImageIndex],
-        //             category: selectedCategory
-        //         };
-
-        //         // 使用GitHub API更新annotations.json
-        //         const token = 'YOUR_GITHUB_TOKEN'; // 替换为你的GitHub Token
-        //         const repo = 'YOUR_USERNAME/image-annotation'; // 替换为你的GitHub用户名和仓库名
-        //         const filePath = 'annotations.json';
-
-        //         fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
-        //             method: 'GET',
-        //             headers: {
-        //                 'Authorization': `token ${token}`
-        //             }
-        //         })
-        //         .then(response => response.json())
-        //         .then(data => {
-        //             const sha = data.sha; // 获取文件的SHA值
-        //             const currentData = JSON.parse(atob(data.content)); // 解码内容
-
-        //             // 更新内容
-        //             currentData.push(annotation);
-        //             const updatedContent = btoa(JSON.stringify(currentData, null, 2)); // 编码为Base64
-
-        //             // 提交更新
-        //             return fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
-        //                 method: 'PUT',
-        //                 headers: {
-        //                     'Authorization': `token ${token}`,
-        //                     'Content-Type': 'application/json'
-        //                 },
-        //                 body: JSON.stringify({
-        //                     message: 'Update annotations',
-        //                     content: updatedContent,
-        //                     sha: sha
-        //                 })
-        //             });
-        //         })
-        //         .then(() => {
-        //             alert('标注已保存');
-        //             currentImageIndex = (currentImageIndex + 1) % images.length;
-        //             loadImage();
-        //         })
-        //         .catch(error => console.error('Error:', error));
-        //     } else {
-        //         alert('请选择一个类别');
-        //     }
-        // });
-        // 更新annotations.json
- // 更新annotations.json
-        async function updateAnnotations(annotation) {
-            const token = 'YOUR_GITHUB_TOKEN'; // 替换为你的GitHub Token
-            const repo = 'YOUR_USERNAME/image-annotation'; // 替换为你的GitHub用户名和仓库名
-            const filePath = 'annotations.json';
-
-            try {
-                const response = await fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `token ${token}`
-                    }
-                });
-
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        // 文件不存在，创建一个新的文件
-                        const newContent = btoa(JSON.stringify([annotation], null, 2));
-                        await fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
-                            method: 'PUT',
-                            headers: {
-                                'Authorization': `token ${token}`,
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                message: 'Create annotations.json',
-                                content: newContent
-                            })
-                        });
-                    } else {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                } else {
-                    const data = await response.json();
-                    const sha = data.sha; // 获取文件的SHA值
-                    const currentData = data.content ? JSON.parse(atob(data.content)) : []; // 解码内容
-
-                    // 更新内容
-                    currentData.push(annotation);
-                    const updatedContent = btoa(JSON.stringify(currentData, null, 2)); // 编码为Base64
-
-                    // 提交更新
-                    await fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `token ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            message: 'Update annotations.json',
-                            content: updatedContent,
-                            sha: sha
-                        })
-                    });
-                }
-            } catch (error) {
-                console.error('Error updating annotations:', error);
-            }
-        }
-
-        // 示例调用
-        const annotation = {
-            image: images[currentImageIndex],
-            category: selectedCategory
-        };
-        updateAnnotations(annotation);
+        
     </script>
 </body>
 </html>
