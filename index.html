@@ -52,9 +52,6 @@
 
         // 实现对json数据的增删改查
         // 先引入所需的模块
-        let { join } = require('path')
-        let { readFile, writeFile } = require('fs')
-        const { json } = require('stream/consumers')
         // 拼接json文件的绝对路径
         let filePath = join(__dirname, 'books.json')
 
@@ -129,8 +126,6 @@
                 })
             })
         }
-        // 删除图书id为3的数据
-        del(3)
 
 
         // 获取图片列表
@@ -168,18 +163,31 @@
                 console.log('No images to display'); // 调试信息
             }
         }
-        // 加载当前图片的标注
-        function loadAnnotations(imageName) {
-            const filePath = join(__dirname, jsonFilePath);
-            readFile(filePath, 'utf-8', (err, data) => {
-                if (err) {
-                    console.error('Error reading labels file:', err);
-                    return;
+        // // 加载当前图片的标注
+        // function loadAnnotations(imageName) {
+        //     const filePath = join(__dirname, jsonFilePath);
+        //     readFile(filePath, 'utf-8', (err, data) => {
+        //         if (err) {
+        //             console.error('Error reading labels file:', err);
+        //             return;
+        //         }
+        //         const labels = JSON.parse(data);
+        //         const annotations = labels[imageName] || [];
+        //         console.log(`Annotations for ${imageName}:`, annotations);
+        //     });
+        // }
+        async function loadAnnotations(imageName) {
+            try {
+                const response = await fetch(jsonFilePath);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                const labels = JSON.parse(data);
-                const annotations = labels[imageName] || [];
+                const data = await response.json();
+                const annotations = data[imageName] || [];
                 console.log(`Annotations for ${imageName}:`, annotations);
-            });
+            } catch (error) {
+                console.error('Error fetching annotations:', error);
+            }
         }
         //处理上一张
         document.getElementById('prev-button').addEventListener('click', function() {
